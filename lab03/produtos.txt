@@ -1,0 +1,35 @@
+Pen Drive 64GB;40;Sandisk
+Cabo HDMI 2m;30;Philips
+Mouse Sem Fio;35;Logitech
+Teclado Multimídia;50;Microsoft
+Fone de Ouvido com Fio;40;JBL
+Luminária de Mesa LED;45;Gizzu
+Capa para Celular;25;Samsung
+Carregador de Celular USB;20;Anker
+Smartwatch Econômico;150;Xiaomi
+Caixa de Som Bluetooth Pequena;120;JBL
+Carregador Portátil 10000mAh;80;Multilaser
+Filtro de Água;120;Brita
+Roteador Wi-Fi 4;100;TP-Link
+Ventilador de Mesa;90;Arno
+Mochila de Notebook;130;Samsonite
+Cadeira de Escritório Básica;150;Millenium
+Caneca Térmica;30;Termolar
+Tênis Casual;120;Nike
+Camiseta Polo Básica;60;Lacoste
+Jaqueta Jeans;100;Levi's
+Calça Jeans Slim;80;Zara
+Relógio de Pulso Simples;50;Casio
+Óculos de Sol;70;Ray-Ban
+Perfume Masculino 100ml;90;Boticário
+Tênis Esportivo;140;Adidas
+Blusa de Frio Básica;50;H&M
+Pasta Executiva;100;Fossil
+Carregador Solar Portátil;60;Solar Power
+Bolsa Feminina Casual;80;Furla
+Teclado Numérico USB;35;Logitech
+Fone de Ouvido In-ear;50;Sony
+Cartão de Memória 128GB;70;SanDisk
+Cabo USB-C;30;Anker
+Smartphone de Entrada;500;Motorola
+Kit De Ferramentas Básicas;100;Stanley
