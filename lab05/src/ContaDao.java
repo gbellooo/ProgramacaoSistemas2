@@ -1,29 +1,31 @@
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.math.BigDecimal;
 
-public class ContaDao implements IContaDao, AutoCloseable {
-    private final Connection conn;
-    private final PreparedStatement pstmCreate;
-    private final PreparedStatement pstmRead;
-    private final PreparedStatement pstmReadByNumber;
-    private final PreparedStatement pstmUpdate;
-    private final PreparedStatement pstmDelete;
+public class ContaDao implements IContaDao {
+    private PreparedStatement pstmCreate;
+    private PreparedStatement pstmRead;
+    private PreparedStatement pstmReadByNumber;
+    private PreparedStatement pstmUpdate;
+    private PreparedStatement pstmDelete;
 
-    public ContaDao(Connection c) throws SQLException {
-        this.conn = c;
-        this.pstmCreate        = conn.prepareStatement("INSERT INTO contas (nro_conta, saldo) VALUES (?, ?)");
-        this.pstmRead          = conn.prepareStatement("SELECT nro_conta, saldo FROM contas ORDER BY nro_conta");
-        this.pstmReadByNumber  = conn.prepareStatement("SELECT nro_conta, saldo FROM contas WHERE nro_conta = ?");
-        this.pstmUpdate        = conn.prepareStatement("UPDATE contas SET saldo = ? WHERE nro_conta = ?");
-        this.pstmDelete        = conn.prepareStatement("DELETE FROM contas WHERE nro_conta = ?");
+    public ContaDao(Connection c) throws Exception {
+        if (c == null) throw new Exception("Conexão nula na ContaDao.");
+        // Melhor explicitar as colunas para evitar problemas de ordem
+        pstmCreate       = c.prepareStatement("INSERT INTO CONTAS (NRO_CONTA, SALDO) VALUES (?, ?)");
+        pstmRead         = c.prepareStatement("SELECT NRO_CONTA, SALDO FROM CONTAS ORDER BY NRO_CONTA");
+        pstmReadByNumber = c.prepareStatement("SELECT NRO_CONTA, SALDO FROM CONTAS WHERE NRO_CONTA = ?");
+        pstmUpdate       = c.prepareStatement("UPDATE CONTAS SET SALDO = ? WHERE NRO_CONTA = ?");
+        pstmDelete       = c.prepareStatement("DELETE FROM CONTAS WHERE NRO_CONTA = ?");
     }
-
+    
     @Override
     public boolean criar(Conta c) {
         try {
-            pstmCreate.clearParameters();
             pstmCreate.setLong(1, c.getNumero());
             pstmCreate.setBigDecimal(2, c.getSaldo());
             return pstmCreate.executeUpdate() == 1;
@@ -36,10 +38,10 @@ public class ContaDao implements IContaDao, AutoCloseable {
     @Override
     public List<Conta> lerTodas() throws Exception {
         List<Conta> contas = new ArrayList<>();
-        try (ResultSet rs = pstmRead.executeQuery()) {
-            while (rs.next()) {
-                long n = rs.getLong("nro_conta");
-                BigDecimal s = rs.getBigDecimal("saldo");
+        try (ResultSet resultados = pstmRead.executeQuery()) {
+            while (resultados.next()){
+                long n = resultados.getLong("nro_conta");
+                BigDecimal s = resultados.getBigDecimal("saldo");
                 contas.add(new Conta(n, s));
             }
         } catch (SQLException e) {
@@ -47,28 +49,27 @@ public class ContaDao implements IContaDao, AutoCloseable {
         }
         return contas;
     }
-
+    
     @Override
-    public Conta buscarPeloNumero(long numero) {
+    public Conta buscarPeloNumero(long id) {
         try {
-            pstmReadByNumber.clearParameters();
-            pstmReadByNumber.setLong(1, numero);
+            pstmReadByNumber.setLong(1, id);
             try (ResultSet rs = pstmReadByNumber.executeQuery()) {
                 if (rs.next()) {
+                    long n = rs.getLong("nro_conta");
                     BigDecimal s = rs.getBigDecimal("saldo");
-                    return new Conta(numero, s);
+                    return new Conta(n, s);
                 }
             }
         } catch (SQLException e) {
             System.out.println("Erro ao buscar conta: " + e.getMessage());
         }
-        return null; // não encontrada ou erro
+        return null;
     }
 
     @Override
     public boolean atualizar(Conta c) {
         try {
-            pstmUpdate.clearParameters();
             pstmUpdate.setBigDecimal(1, c.getSaldo());
             pstmUpdate.setLong(2, c.getNumero());
             return pstmUpdate.executeUpdate() == 1;
@@ -81,23 +82,11 @@ public class ContaDao implements IContaDao, AutoCloseable {
     @Override
     public boolean apagar(Conta c) {
         try {
-            pstmDelete.clearParameters();
             pstmDelete.setLong(1, c.getNumero());
             return pstmDelete.executeUpdate() == 1;
         } catch (SQLException e) {
             System.out.println("Erro ao apagar conta: " + e.getMessage());
             return false;
         }
-    }
-
-    @Override
-    public void close() {
-        try { if (pstmCreate != null) pstmCreate.close(); } catch (Exception ignored) {}
-        try { if (pstmRead != null) pstmRead.close(); } catch (Exception ignored) {}
-        try { if (pstmReadByNumber != null) pstmReadByNumber.close(); } catch (Exception ignored) {}
-        try { if (pstmUpdate != null) pstmUpdate.close(); } catch (Exception ignored) {}
-        try { if (pstmDelete != null) pstmDelete.close(); } catch (Exception ignored) {}
-        // Feche a Connection aqui se desejar centralizar:
-        // try { if (conn != null) conn.close(); } catch (Exception ignored) {}
     }
 }

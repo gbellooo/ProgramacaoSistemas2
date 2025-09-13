@@ -1,127 +1,76 @@
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 public class App {
-    private static BigDecimal lerBigDecimal(Scanner sc, String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String s = sc.nextLine().trim()
-                .replace(".", "")      // permite digitar 1.000,50
-                .replace(",", ".");    // vírgula como decimal
-            try {
-                return new BigDecimal(s);
-            } catch (Exception e) {
-                System.out.println("Valor inválido. Tente novamente.");
-            }
-        }
-    }
-
-    private static long lerLong(Scanner sc, String prompt) {
-        while (true) {
-            System.out.print(prompt);
-            String s = sc.nextLine().trim();
-            try {
-                return Long.parseLong(s);
-            } catch (Exception e) {
-                System.out.println("Número inválido. Tente novamente.");
-            }
-        }
-    }
-
     public static void main(String[] args) throws Exception {
-        // ==> Ajuste sua URL aqui (ideal: usar variável de ambiente DB_URL)
-        String url = "jdbc:postgresql://aws-1-sa-east-1.pooler.supabase.com:6543/postgres?user=postgres.qvusurjoazclggvxrgvp&password=mackenzie@java";
+        Locale.setDefault(Locale.US);
+        Scanner sc = new Scanner(System.in);
 
-        Connection conn = ConnectionFactory.getConnection(url);
-        if (conn == null) {
-            System.out.println("Não foi possível abrir conexão. Verifique a URL/credenciais.");
-            return;
-        }
+        String url = "jdbc:postgresql://aws-1-us-east-1.pooler.supabase.com:6543/postgres?user=postgres.zuwmidevfxstazryemej&password=j37eg0qww2e";
+        ContaDao dao = new ContaDao(ConnectionFactory.getConnection(url));
 
-        try (ContaDao dao = new ContaDao(conn); Scanner sc = new Scanner(System.in)) {
-            int opcao;
-            do {
-                System.out.println("\n=== MENU CONTAS ===");
-                System.out.println("(1) Listar todas as contas");
-                System.out.println("(2) Buscar uma conta específica pelo número");
-                System.out.println("(3) Criar uma nova conta");
-                System.out.println("(4) Alterar o saldo de uma conta");
-                System.out.println("(5) Apagar uma conta");
-                System.out.println("(0) Sair");
-                System.out.print("Escolha: ");
+        while (true) {
+            System.out.println("\n(1) Listar todas as contas");
+            System.out.println("(2) Buscar uma conta específica pelo número");
+            System.out.println("(3) Criar uma nova conta");
+            System.out.println("(4) Alterar o saldo de uma conta");
+            System.out.println("(5) Apagar uma conta");
+            System.out.println("(0) Sair");
+            System.out.print("Opção: ");
+            String op = sc.nextLine().trim();
 
-                String entrada = sc.nextLine().trim();
-                if (entrada.isEmpty()) continue;
-                try {
-                    opcao = Integer.parseInt(entrada);
-                } catch (NumberFormatException e) {
-                    System.out.println("Opção inválida.");
-                    continue;
-                }
-
-                switch (opcao) {
-                    case 1: { // Listar todas
-                        try {
-                            List<Conta> contas = dao.lerTodas();
-                            if (contas.isEmpty()) {
-                                System.out.println("Nenhuma conta encontrada.");
-                            } else {
-                                contas.forEach(System.out::println);
-                            }
-                        } catch (Exception e) {
-                            System.out.println("Erro ao listar contas: " + e.getMessage());
-                        }
+            try {
+                switch (op) {
+                    case "1": {
+                        List<Conta> contas = dao.lerTodas();
+                        if (contas.isEmpty()) System.out.println("Nenhuma conta encontrada.");
+                        else contas.forEach(System.out::println);
                         break;
                     }
-                    case 2: { // Buscar por número
-                        long numero = lerLong(sc, "Número da conta: ");
-                        Conta c = dao.buscarPeloNumero(numero);
-                        if (c == null) {
-                            System.out.println("Conta não encontrada.");
-                        } else {
-                            System.out.println("Encontrada: " + c);
-                        }
+                    case "2": {
+                        System.out.print("Número da conta: ");
+                        long n = Long.parseLong(sc.nextLine());
+                        Conta c = dao.buscarPeloNumero(n);
+                        System.out.println(c == null ? "Conta não encontrada." : c);
                         break;
                     }
-                    case 3: { // Criar
-                        long numero = lerLong(sc, "Número da nova conta: ");
-                        BigDecimal saldo = lerBigDecimal(sc, "Saldo inicial: ");
-                        boolean ok = dao.criar(new Conta(numero, saldo));
-                        System.out.println(ok ? "Conta criada com sucesso." : "Falha ao criar conta (talvez já exista?).");
+                    case "3": {
+                        System.out.print("Número da conta (long): ");
+                        long n = Long.parseLong(sc.nextLine());
+                        System.out.print("Saldo inicial (ex: 1000.00): ");
+                        BigDecimal s = new BigDecimal(sc.nextLine());
+                        boolean ok = dao.criar(new Conta(n, s));
+                        System.out.println(ok ? "Conta criada." : "Falha ao criar conta.");
                         break;
                     }
-                    case 4: { // Alterar saldo
-                        long numero = lerLong(sc, "Número da conta: ");
-                        Conta c = dao.buscarPeloNumero(numero);
-                        if (c == null) {
-                            System.out.println("Conta não encontrada.");
-                            break;
-                        }
-                        System.out.println("Saldo atual: " + c.getSaldo());
-                        BigDecimal novoSaldo = lerBigDecimal(sc, "Novo saldo: ");
-                        c.setSaldo(novoSaldo);
-                        boolean ok = dao.atualizar(c);
+                    case "4": {
+                        System.out.print("Número da conta: ");
+                        long n = Long.parseLong(sc.nextLine());
+                        System.out.print("Novo saldo: ");
+                        BigDecimal s = new BigDecimal(sc.nextLine());
+                        boolean ok = dao.atualizar(new Conta(n, s));
                         System.out.println(ok ? "Saldo atualizado." : "Falha ao atualizar saldo.");
                         break;
                     }
-                    case 5: { // Apagar
-                        long numero = lerLong(sc, "Número da conta a apagar: ");
-                        boolean ok = dao.apagar(new Conta(numero, BigDecimal.ZERO));
-                        System.out.println(ok ? "Conta apagada." : "Falha ao apagar (talvez não exista).");
+                    case "5": {
+                        System.out.print("Número da conta: ");
+                        long n = Long.parseLong(sc.nextLine());
+                        boolean ok = dao.apagar(new Conta(n, null));
+                        System.out.println(ok ? "Conta apagada." : "Falha ao apagar conta.");
                         break;
                     }
-                    case 0:
+                    case "0":
                         System.out.println("Saindo...");
-                        break;
+                        sc.close();
+                        return;
                     default:
                         System.out.println("Opção inválida.");
                 }
-
-            } while (true && (/*opcao != 0 handled inside*/ true)); // laço controlado por '0' no switch
-
-        } // fecha DAO e Scanner (e statements). Feche a Connection se não fechar no DAO:
-        // conn.close();
+            } catch (Exception e) {
+                System.out.println("Erro: " + e.getMessage());
+            }
+        }
     }
 }

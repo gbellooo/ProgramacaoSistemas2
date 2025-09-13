@@ -9,19 +9,14 @@ public class Conta {
         saldo = s;
     }
 
-    public long getNumero() { return numero;}
-    public void setNumero(long n) {
-        numero = n;
-    }
+    public long getNumero() { return numero; }
+    public void setNumero(long n) { numero = n; }
 
-    public BigDecimal getSaldo() {return saldo;}
-    public void setSaldo(BigDecimal s) {
-        saldo = s;
-    }
+    public BigDecimal getSaldo() { return saldo; }
+    public void setSaldo(BigDecimal s) { saldo = s; }
 
     @Override
     public String toString() {
         return "Conta [numero=" + numero + ", saldo=" + saldo + "]";
     }
-    
 }
