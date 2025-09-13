@@ -8,7 +8,7 @@ public class App {
         Locale.setDefault(Locale.US);
         Scanner sc = new Scanner(System.in);
 
-        String url = "jdbc:postgresql://aws-1-us-east-1.pooler.supabase.com:6543/postgres?user=postgres.zuwmidevfxstazryemej&password=j37eg0qww2e";
+        String url = "jdbc:postgresql://aws-1-sa-east-1.pooler.supabase.com:6543/postgres?user=postgres.qvusurjoazclggvxrgvp&password=mackenzie@java";
         ContaDao dao = new ContaDao(ConnectionFactory.getConnection(url));
 
         while (true) {
